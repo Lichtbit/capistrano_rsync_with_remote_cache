@@ -22,9 +22,11 @@ module Capistrano
         default_attribute :rsync_options, '-az --delete-excluded'
         default_attribute :local_cache, '.rsync_cache'
         default_attribute :repository_cache, 'cached-copy'
+        default_attribute :command_after_update_local_cache, ''
 
         def deploy!
           update_local_cache
+          after_update_local_cache
           update_remote_cache
           copy_remote_cache
         end
@@ -37,6 +39,10 @@ module Capistrano
         def update_remote_cache
           finder_options = {:except => { :no_release => true }}
           find_servers(finder_options).each {|s| sync_source_to(s) }
+        end
+
+        def after_update_local_cache
+          system(command_after_update_local_cache) unless command_after_update_local_cache.empty?
         end
 
         def copy_remote_cache
