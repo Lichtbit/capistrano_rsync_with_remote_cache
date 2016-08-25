@@ -79,6 +79,17 @@ RSpec.describe Capistrano::Deploy::Strategy::RsyncWithRemoteCache do
     end
   end
 
+  describe "#command_after_update_local_cache" do
+    it "has a default value" do
+      expect(subject.command_after_update_local_cache).to eq('')
+    end
+
+    it "allows a user-specified value" do
+      expect(subject).to receive(:configuration).with(no_args).and_return(:command_after_update_local_cache => 'command')
+      expect(subject.command_after_update_local_cache).to eq('command')
+    end
+  end
+
   describe "#repository_url" do
     before { expect(subject).to receive(:local_cache_path).with(no_args).and_return('cache_path') }
 
@@ -348,6 +359,15 @@ RSpec.describe Capistrano::Deploy::Strategy::RsyncWithRemoteCache do
     end
   end
 
+  describe "#after_update_local_cache" do
+    it "executes the command after local cache updated" do
+      allow(subject).to receive(:command_after_update_local_cache).with(no_args).and_return('command')
+      expect(subject).to receive(:system).with(subject.command_after_update_local_cache)
+
+      subject.after_update_local_cache
+    end
+  end
+
   describe "#sync_source_to" do
     let(:server) { double(:server) }
 
@@ -422,6 +442,7 @@ RSpec.describe Capistrano::Deploy::Strategy::RsyncWithRemoteCache do
   describe "#deploy!" do
     it "deploys the code" do
       expect(subject).to receive(:update_local_cache).with(no_args)
+      expect(subject).to receive(:after_update_local_cache).with(no_args)
       expect(subject).to receive(:update_remote_cache).with(no_args)
       expect(subject).to receive(:copy_remote_cache).with(no_args)
 
