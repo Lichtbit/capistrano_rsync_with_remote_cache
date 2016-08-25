@@ -360,9 +360,15 @@ RSpec.describe Capistrano::Deploy::Strategy::RsyncWithRemoteCache do
   end
 
   describe "#after_update_local_cache" do
-    it "executes the command after local cache updated" do
+    it "executes user-specified command after local cache updated" do
       allow(subject).to receive(:command_after_update_local_cache).with(no_args).and_return('command')
       expect(subject).to receive(:system).with(subject.command_after_update_local_cache)
+
+      subject.after_update_local_cache
+    end
+    it "executes default command after local cache updated" do
+      allow(subject).to receive(:command_after_update_local_cache).with(no_args).and_return('')
+      expect(subject).to receive(:system).exactly(0).times
 
       subject.after_update_local_cache
     end
