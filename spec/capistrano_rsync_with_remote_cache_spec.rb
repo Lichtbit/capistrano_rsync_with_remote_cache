@@ -360,11 +360,17 @@ RSpec.describe Capistrano::Deploy::Strategy::RsyncWithRemoteCache do
   end
 
   describe "#after_update_local_cache" do
-    it "executes user-specified command after local cache updated" do
-      allow(subject).to receive(:command_after_update_local_cache).with(no_args).and_return('command')
-      expect(subject).to receive(:system).with(subject.command_after_update_local_cache)
+    it "executes valid user-specified command after local cache updated" do
+      allow(subject).to receive(:command_after_update_local_cache).with(no_args).and_return('valid command')
+      expect(subject).to receive(:system).with(subject.command_after_update_local_cache).and_return(true)
 
       subject.after_update_local_cache
+    end
+    it "executes invalid user-specified command after local cache updated" do
+      allow(subject).to receive(:command_after_update_local_cache).with(no_args).and_return('invalid command')
+      expect(subject).to receive(:system).with(subject.command_after_update_local_cache).and_return(false)
+
+      expect { subject.after_update_local_cache }.to raise_error(Capistrano::CommandError)
     end
     it "executes default command after local cache updated" do
       allow(subject).to receive(:command_after_update_local_cache).with(no_args).and_return('')

@@ -42,7 +42,9 @@ module Capistrano
         end
 
         def after_update_local_cache
-          system(command_after_update_local_cache) unless command_after_update_local_cache.empty?
+          unless command_after_update_local_cache.empty?
+            system(command_after_update_local_cache) || raise(CommandError, 'Error occurs when executing command defined in `command_after_update_local_cache`')
+          end
         end
 
         def copy_remote_cache
