@@ -68,7 +68,9 @@ module Capistrano
         end
 
         def ssh_port(server)
-          server.port || ssh_options[:port] || configuration[:port]
+          ssh_options = server.options[:ssh_options]
+          ssh_options_port = ssh_options[:port] if ssh_options
+          ssh_options_port || server.port || ssh_options[:port] || configuration[:port]
         end
 
         def ssh_command_for(server)
